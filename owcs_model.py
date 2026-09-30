@@ -14,7 +14,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 
-def load_config(file_path: str ="config.json") -> ?:
+def load_config(file_path ="config.json"):
     """Loads configuration and observations from the JSON file."""
     try:
         with open(file_path, "r") as file:
@@ -23,7 +23,7 @@ def load_config(file_path: str ="config.json") -> ?:
         raise ValueError(f"Configuration file {file_path} not found.")
 
 
-def calculate_dissolution_rate(ph: float) -> float:
+def calculate_dissolution_rate(ph):
     """
     Calculates the dissolution rate (log r) based on pH using Olsen's equations[cite: 4].
     """
