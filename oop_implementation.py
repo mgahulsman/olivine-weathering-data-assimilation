@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 from pydantic import BaseModel
 from molmass import Formula
 
+from true_values import TRUE_VALUES, Observation
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
@@ -17,8 +19,7 @@ class Environment(BaseModel):
 
 
 class Model:
-    # TODO: implement true values
-    def __init__(self, environment: Environment, true_values=None):
+    def __init__(self, environment: Environment, true_values: list[Observation]):
         self.environment = environment
         self.true_values = true_values
 
@@ -72,5 +73,5 @@ class Model:
 
 if __name__ == "__main__":
     env = Environment()
-    model = Model(environment=env, true_values=None)
+    model = Model(environment=env, true_values=TRUE_VALUES)
     model.run_model()
