@@ -1,64 +1,189 @@
 from pydantic import BaseModel
 
-class Diameter(BaseModel):
-    original_diameter: float # micro meter
-    original_mass: float # kg
-    remaining_mass: float # kg
-    dissolved: float # percentage
-
-
+    
 class Observation(BaseModel):
-    year: int
-    diameters: list[float]
-    total_remaining_mass: float | None = None # Totale resterende massa in kg
+    initial_diam: int # micro meter (We don't need this since it's in diam_over_years, but we might want to use it as id)
+    original_mass: int # kg
+    remaining_mass: float # kg
+    percentage_dissolved: float # %
+    diam_over_years: dict[int, int] # key: years, value: diameters (micro meter)
 
-class TrueData(BaseModel):
-    original_masses: list[float] # De startmassa per fractie (in kg)
-    observations: list[Observation]
 
-# Data from Table 2
-true_data = TrueData(
-    original_masses=[55, 109, 144, 243, 199, 102, 49, 33, 37, 13, 16],
-    observations=[
-        Observation(
-            year=0,
-            diameters=[2000, 1410, 1000, 707, 420, 250, 150, 88, 50, 16, 8],
-            total_remaining_mass=1000.0
-        ),
-        Observation(
-            year=1,
-            diameters=[2000, 1410, 999, 706, 419, 249, 149, 87, 49, 15, 7],
-            total_remaining_mass=None
-        ),
-        Observation(
-            year=3,
-            diameters=[1993, 1407, 993, 700, 413, 243, 143, 81, 43, 9, 1],
-            total_remaining_mass=None
-        ),
-        Observation(
-            year=5,
-            diameters=[1989, 1403, 989, 696, 409, 239, 139, 77, 39, 5, 0],
-            total_remaining_mass=None
-        ),
-        Observation(
-            year=10,
-            diameters=[1982, 1398, 982, 689, 402, 232, 132, 70, 32, 0, 0],
-            total_remaining_mass=None
-        ),
-        Observation(
-            year=15,
-            diameters=[1971, 1394, 971, 678, 391, 221, 121, 59, 21, 0, 0],
-            total_remaining_mass=None
-        ),
-        Observation(
-            year=30,
-            diameters=[1946, 1377, 946, 653, 366, 196, 96, 34, 0, 0, 0],
-            total_remaining_mass=None
-        ),
-        Observation(
-            year=40,
-            diameters=[1928, 1361, 928, 635, 348, 178, 78, 16, 0, 0, 0],
-            total_remaining_mass=519.0
-        )
-    ]
-)
+true_data: list[Observation] = [
+    Observation(
+        initial_diam=2000,
+        original_mass=55,
+        remaining_mass=48.0,
+        percentage_dissolved=13.0,
+        diam_over_years={
+            0: 2000,
+            1: 2000,
+            3: 1993,
+            5: 1989,
+            10: 1982,
+            15: 1971,
+            30: 1946,
+            40: 1928,
+        }
+    ),
+    Observation(
+        initial_diam=1410,
+        original_mass=109,
+        remaining_mass=90.0,
+        percentage_dissolved=17.0,
+        diam_over_years={
+            0: 1410,
+            1: 1410,
+            3: 1407,
+            5: 1403,
+            10: 1398,
+            15: 1394,
+            30: 1377,
+            40: 1361,
+        }
+    ),
+    Observation(
+        initial_diam=1000,
+        original_mass=144,
+        remaining_mass=110.0,
+        percentage_dissolved=24.0,
+        diam_over_years={
+            0: 1000,
+            1: 999,
+            3: 993,
+            5: 989,
+            10: 982,
+            15: 971,
+            30: 946,
+            40: 928,
+        }
+    ),
+    Observation(
+        initial_diam=707,
+        original_mass=243,
+        remaining_mass=156.0,
+        percentage_dissolved=36.0,
+        diam_over_years={
+            0: 707,
+            1: 706,
+            3: 700,
+            5: 696,
+            10: 689,
+            15: 678,
+            30: 653,
+            40: 635,
+        }
+    ),
+    Observation(
+        initial_diam=420,
+        original_mass=199,
+        remaining_mass=90.0,
+        percentage_dissolved=55.0,
+        diam_over_years={
+            0: 420,
+            1: 419,
+            3: 413,
+            5: 409,
+            10: 402,
+            15: 391,
+            30: 366,
+            40: 348,
+        }
+    ),
+    Observation(
+        initial_diam=250,
+        original_mass=102,
+        remaining_mass=23.0,
+        percentage_dissolved=77.0,
+        diam_over_years={
+            0: 250,
+            1: 249,
+            3: 243,
+            5: 239,
+            10: 232,
+            15: 221,
+            30: 196,
+            40: 178,
+        }
+    ),
+    Observation(
+        initial_diam=150,
+        original_mass=49,
+        remaining_mass=2.0,
+        percentage_dissolved=97.0,
+        diam_over_years={
+            0: 150,
+            1: 149,
+            3: 143,
+            5: 139,
+            10: 132,
+            15: 121,
+            30: 96,
+            40: 78,
+        }
+    ),
+    Observation(
+        initial_diam=88,
+        original_mass=33,
+        remaining_mass=0.0,
+        percentage_dissolved=100.0,
+        diam_over_years={
+            0: 88,
+            1: 87,
+            3: 81,
+            5: 77,
+            10: 70,
+            15: 59,
+            30: 34,
+            40: 16,
+        }
+    ),
+    Observation(
+        initial_diam=50,
+        original_mass=37,
+        remaining_mass=0.0,
+        percentage_dissolved=100.0,
+        diam_over_years={
+            0: 50,
+            1: 49,
+            3: 43,
+            5: 39,
+            10: 32,
+            15: 21,
+            30: 0,
+            40: 0,
+        }
+    ),
+    Observation(
+        initial_diam=16,
+        original_mass=13,
+        remaining_mass=0.0,
+        percentage_dissolved=100.0,
+        diam_over_years={
+            0: 16,
+            1: 15,
+            3: 9,
+            5: 5,
+            10: 0,
+            15: 0,
+            30: 0,
+            40: 0,
+        }
+    ),
+    Observation(
+        initial_diam=8,
+        original_mass=16,
+        remaining_mass=0.0,
+        percentage_dissolved=100.0,
+        diam_over_years={
+            0: 8,
+            1: 7,
+            3: 1,
+            5: 0,
+            10: 0,
+            15: 0,
+            30: 0,
+            40: 0,
+        }
+    )
+]
