@@ -37,8 +37,8 @@ class Model:
     
 
     @property
-    def dissolution_rate(self):
-        """Berekent automatisch de dissolution rate op basis van de huidige pH."""
+    def dissolution_rate(self) -> float:
+        """Calculates dissolution rate accourding to the formula in section 2"""
         if self.ph < 6.0:
             log_r = -0.48 * self.ph - 6.9
         else:
