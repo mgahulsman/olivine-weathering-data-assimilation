@@ -9,7 +9,7 @@ class Observation(BaseModel):
     diam_over_years: dict[int, int] # key: years, value: diameters (micro meter)
 
 
-true_data: list[Observation] = [
+TRUE_VALUES: list[Observation] = [
     Observation(
         initial_diam=2000,
         original_mass=55,
