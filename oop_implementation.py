@@ -77,6 +77,7 @@ class Model:
         """
         Update the state parameters
         """
+        # TODO: next step is this
         ...
 
     def run_model(self):
