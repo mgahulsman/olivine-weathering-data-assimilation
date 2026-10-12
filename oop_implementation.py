@@ -40,22 +40,19 @@ class ModelObservation(BaseModel):
 
 
 class Model:
-    def __init__(self, environment: Environment, true_values: list[TrueObservation]):
+    def __init__(self, environment: Environment, model_observation: list[ModelObservation], true_values: list[TrueObservation]):
         self.environment = environment
+        self.model_observations = model_observation
         self.true_values = true_values
 
         # State variables
         self.ph: float = 6.0
         self.co2: int = ... # ppm
-        self.diam_distribution: list[float] = [8, 16, 50, 88, 150, 250, 420, 707, 1000, 1410, 2000]
 
         # Model settings
         self.time: int = 40 # year
         self.co2_capture_ratio = 4 * Formula("CO2").mass / Formula("Mg2SiO4").mass # See reaction formula page 2
 
-        # Keep track of history
-        self.history = {obs.initial_diam: {0: obs.initial_diam} for obs in self.true_values}
-        
         # Initialize plot results
         plt.figure(figsize=(10, 6))
     
@@ -109,16 +106,7 @@ class Model:
         """
         Update the state parameters
         """
-        new_distribution = []
-        for i, diam in enumerate(self.diam_distribution):
-            new_diam = self.calculate_shrunk_diameter(diam, self.dissolution_rate)
-            new_distribution.append(new_diam)
-            
-            # Sla de waarde op voor de historie/plot
-            init_d = self.true_values[i].initial_diam
-            self.history[init_d][current_year] = new_diam
-            
-        self.diam_distribution = new_distribution
+        ...
 
     def run_model(self):
         for current_year in range(1, self.time + 1):
