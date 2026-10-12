@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
     
-class Observation(BaseModel):
+class TrueObservation(BaseModel):
     initial_diam: int # micro meter (We don't need this since it's in diam_over_years, but we might want to use it as id)
     original_mass: int # kg
     remaining_mass: float # kg
@@ -9,8 +9,8 @@ class Observation(BaseModel):
     diam_over_years: dict[int, int] # key: years, value: diameters (micro meter)
 
 
-TRUE_VALUES: list[Observation] = [
-    Observation(
+TRUE_VALUES: list[TrueObservation] = [
+    TrueObservation(
         initial_diam=2000,
         original_mass=55,
         remaining_mass=48.0,
@@ -26,7 +26,7 @@ TRUE_VALUES: list[Observation] = [
             40: 1928,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=1410,
         original_mass=109,
         remaining_mass=90.0,
@@ -42,7 +42,7 @@ TRUE_VALUES: list[Observation] = [
             40: 1361,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=1000,
         original_mass=144,
         remaining_mass=110.0,
@@ -58,7 +58,7 @@ TRUE_VALUES: list[Observation] = [
             40: 928,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=707,
         original_mass=243,
         remaining_mass=156.0,
@@ -74,7 +74,7 @@ TRUE_VALUES: list[Observation] = [
             40: 635,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=420,
         original_mass=199,
         remaining_mass=90.0,
@@ -90,7 +90,7 @@ TRUE_VALUES: list[Observation] = [
             40: 348,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=250,
         original_mass=102,
         remaining_mass=23.0,
@@ -106,7 +106,7 @@ TRUE_VALUES: list[Observation] = [
             40: 178,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=150,
         original_mass=49,
         remaining_mass=2.0,
@@ -122,7 +122,7 @@ TRUE_VALUES: list[Observation] = [
             40: 78,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=88,
         original_mass=33,
         remaining_mass=0.0,
@@ -138,7 +138,7 @@ TRUE_VALUES: list[Observation] = [
             40: 16,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=50,
         original_mass=37,
         remaining_mass=0.0,
@@ -154,7 +154,7 @@ TRUE_VALUES: list[Observation] = [
             40: 0,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=16,
         original_mass=13,
         remaining_mass=0.0,
@@ -170,7 +170,7 @@ TRUE_VALUES: list[Observation] = [
             40: 0,
         }
     ),
-    Observation(
+    TrueObservation(
         initial_diam=8,
         original_mass=16,
         remaining_mass=0.0,
