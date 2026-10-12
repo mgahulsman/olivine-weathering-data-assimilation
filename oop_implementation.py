@@ -4,10 +4,10 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from molmass import Formula
 
-from true_values import TRUE_VALUES, Observation
+from true_values import TRUE_VALUES, TrueObservation
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -21,8 +21,26 @@ class Environment(BaseModel):
     porosity: float = 0.3
 
 
+class ModelObservation(BaseModel):
+    initial_diam: float
+    original_mass: float
+    diam_per_step: list[float] = []
+    mass_per_step: list[float] = []
+    percentage_dissolved_per_step: list[float] = []
+
+    @model_validator(mode="after")
+    def initialize_lists(self) -> "ModelObservation":
+        if not self.diam_per_step:
+            self.diam_per_step = [self.initial_diam]
+        if not self.mass_per_step:
+                    self.mass_per_step = [self.orginal_mass]
+        if not self.percentage_dissolved_per_step:
+            self.percentage_dissolved_per_step = [0.0]
+        return self
+
+
 class Model:
-    def __init__(self, environment: Environment, true_values: list[Observation]):
+    def __init__(self, environment: Environment, true_values: list[TrueObservation]):
         self.environment = environment
         self.true_values = true_values
 
@@ -82,7 +100,7 @@ class Model:
         plt.grid(True, linestyle="--", alpha=0.5)
         
         # Save plot to file
-        output_filename = "owcs_spaghetti_plot.png"
+        output_filename = "owcs_spaghetti_plot_test.png"
         plt.savefig(output_filename, dpi=300)
         logging.info(f"Spaghetti plot successfully saved as '{output_filename}'")
         plt.close()
