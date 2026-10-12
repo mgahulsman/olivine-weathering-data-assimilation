@@ -64,6 +64,14 @@ class Model:
         
         return max(0.0, current_diam - diam_reduction)
 
+    @staticmethod
+    def increase_ph():
+        """Increases the pH since olivine is basic"""
+        ...
+
+    def create_plot():
+        ...
+
     def spaghetti_plot(self):
         plt.title("Ensemble Forward Run: CO2 Sequestration Uncertainty (Spaghetti Plot)")
         plt.xlabel("Years of Weathering")
