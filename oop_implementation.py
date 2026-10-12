@@ -25,24 +25,26 @@ class ModelObservation(BaseModel):
     initial_diam: float
     original_mass: float
     diam_per_step: list[float] = []
-    mass_per_step: list[float] = []
-    percentage_dissolved_per_step: list[float] = []
+
+    # TODO: implement these
+    # mass_per_step: list[float] = []
+    # percentage_dissolved_per_step: list[float] = []
 
     @model_validator(mode="after")
     def initialize_lists(self) -> "ModelObservation":
         if not self.diam_per_step:
             self.diam_per_step = [self.initial_diam]
-        if not self.mass_per_step:
-                    self.mass_per_step = [self.orginal_mass]
-        if not self.percentage_dissolved_per_step:
-            self.percentage_dissolved_per_step = [0.0]
+        # if not self.mass_per_step:
+        #             self.mass_per_step = [self.orginal_mass]
+        # if not self.percentage_dissolved_per_step:
+        #     self.percentage_dissolved_per_step = [0.0]
         return self
 
 
 class Model:
-    def __init__(self, environment: Environment, model_observation: list[ModelObservation], true_values: list[TrueObservation]):
+    def __init__(self, environment: Environment, model_observations: list[ModelObservation], true_values: list[TrueObservation]):
         self.environment = environment
-        self.model_observations = model_observation
+        self.model_observations = model_observations
         self.true_values = true_values
 
         # State variables
@@ -55,6 +57,22 @@ class Model:
 
         # Initialize plot results
         plt.figure(figsize=(10, 6))
+
+    def __str__(self) -> str:
+        summary = [
+            f"\n\n=== Model Summary ===\n",
+            f"Environment: Temp={self.environment.average_temperature}°C, Rainfall={self.environment.rainfall}mm/year",
+            f"State: pH={self.ph}, Time steps={self.time} years",
+            "Observations (Initial -> Final Diameter):"
+        ]
+        for obs in self.model_observations:
+            initial = obs.diam_per_step[0]
+            final = obs.diam_per_step[-1]
+            summary.append(f"  - {initial} µm -> {final:.2f} µm (Steps recorded: {len(obs.diam_per_step)})")
+
+        summary.append("\n\n")
+        
+        return "\n".join(summary)
     
 
     @property
@@ -91,32 +109,32 @@ class Model:
         ...
 
     def spaghetti_plot(self):
-        plt.title("Ensemble Forward Run: CO2 Sequestration Uncertainty (Spaghetti Plot)")
-        plt.xlabel("Years of Weathering")
-        plt.ylabel("Cumulative CO2 Capture (kg)")
-        plt.grid(True, linestyle="--", alpha=0.5)
-        
-        # Save plot to file
-        output_filename = "owcs_spaghetti_plot_test.png"
-        plt.savefig(output_filename, dpi=300)
-        logging.info(f"Spaghetti plot successfully saved as '{output_filename}'")
-        plt.close()
+        ...
 
-    def step(self, current_year):
+    def step(self):
         """
         Update the state parameters
         """
-        ...
+        for model_obeservation in model_observations:
+            model_obeservation.diam_per_step.append(
+                self.calculate_shrunk_diameter(
+                    current_diam=model_obeservation.diam_per_step[-1], 
+                    dissolution_rate=self.dissolution_rate    
+            ))
 
     def run_model(self):
         for current_year in range(1, self.time + 1):
             logging.info(f"Running step year {current_year} of {self.time} years.")
-            self.step(current_year)
+            self.step()
+
+        # Print an overview of what happened
+        logging.info(self)
 
         self.spaghetti_plot()
 
 
 if __name__ == "__main__":
-    env = Environment()
-    model = Model(environment=env, true_values=TRUE_VALUES)
+    environment = Environment()
+    model_observations = [ModelObservation(initial_diam=1000, original_mass=144)]
+    model = Model(environment=environment, model_observations=model_observations, true_values=TRUE_VALUES)
     model.run_model()
