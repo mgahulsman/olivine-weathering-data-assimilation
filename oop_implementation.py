@@ -32,6 +32,9 @@ class Model:
         self.time: int = 40 # year
         self.co2_capture_ratio = 4 * Formula("CO2").mass / Formula("Mg2SiO4").mass # See reaction formula page 2
 
+        # Keep track of history
+        self.history = {obs.initial_diam: {0: obs.initial_diam} for obs in self.true_values}
+        
         # Initialize plot results
         plt.figure(figsize=(10, 6))
     
@@ -73,17 +76,25 @@ class Model:
         logging.info(f"Spaghetti plot successfully saved as '{output_filename}'")
         plt.close()
 
-    def step(self):
+    def step(self, current_year):
         """
         Update the state parameters
         """
-        # TODO: next step is this
-        ...
+        new_distribution = []
+        for i, diam in enumerate(self.diam_distribution):
+            new_diam = self.calculate_shrunk_diameter(diam, self.dissolution_rate)
+            new_distribution.append(new_diam)
+            
+            # Sla de waarde op voor de historie/plot
+            init_d = self.true_values[i].initial_diam
+            self.history[init_d][current_year] = new_diam
+            
+        self.diam_distribution = new_distribution
 
     def run_model(self):
         for current_year in range(1, self.time + 1):
             logging.info(f"Running step year {current_year} of {self.time} years.")
-            self.step()
+            self.step(current_year)
 
         self.spaghetti_plot()
 
