@@ -105,8 +105,33 @@ class Model:
         """Increases the pH since olivine is basic"""
         ...
 
-    def create_plot():
-        ...
+    def plot_model(self):
+        """Plots the model simulation results against true observational data."""
+        plt.figure(figsize=(10, 6))
+        
+        for model_obs in self.model_observations:
+            init_d = model_obs.initial_diam
+            years = list(range(len(model_obs.diam_per_step)))
+            
+            plt.plot(years, model_obs.diam_per_step, label=f"Model {init_d} µm", linestyle="-", linewidth=2)
+            
+            matching_true = next((t for t in self.true_values if t.initial_diam == init_d), None)
+            if matching_true:
+                true_years = sorted(matching_true.diam_over_years.keys())
+                true_diams = [matching_true.diam_over_years[y] for y in true_years]
+                plt.plot(true_years, true_diams, label=f"True {init_d} µm", linestyle="--", marker="o", alpha=0.7)
+
+        plt.title("Model vs. True Values: Olivine Weathering & Particle Shrinkage")
+        plt.xlabel("Years of Weathering")
+        plt.ylabel("Particle Diameter ($\mu$m)")
+        plt.grid(True, linestyle="--", alpha=0.5)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small')
+        plt.tight_layout()
+
+        output_filename = "olivine_model_comparison.png"
+        plt.savefig(output_filename, dpi=300)
+        logging.info(f"Model comparison plot successfully saved as '{output_filename}'")
+        plt.close()
 
     def spaghetti_plot(self):
         ...
@@ -130,11 +155,14 @@ class Model:
         # Print an overview of what happened
         logging.info(self)
 
-        self.spaghetti_plot()
+        self.plot_model()
 
 
 if __name__ == "__main__":
     environment = Environment()
-    model_observations = [ModelObservation(initial_diam=1000, original_mass=144)]
+    model_observations = [
+        ModelObservation(initial_diam=1000, original_mass=144),
+        ModelObservation(initial_diam=707, original_mass=243),        
+    ]
     model = Model(environment=environment, model_observations=model_observations, true_values=TRUE_VALUES)
     model.run_model()
