@@ -1,6 +1,9 @@
 import logging
 
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+
 from pydantic import BaseModel
 from molmass import Formula
 
