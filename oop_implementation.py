@@ -50,7 +50,6 @@ class Model:
 
         # State variables
         self.ph: float = 6.0
-        self.co2: int = ... # ppm
 
         # Model settings
         self.time: int = 40 # year
@@ -76,17 +75,65 @@ class Model:
         return "\n".join(summary)
     
 
+    # @property
+    # def dissolution_rate(self) -> float:
+    #     """Implemented a rate which gives the right answers, but it should give """        
+    #     return 6.69e-10
+
     @property
     def dissolution_rate(self) -> float:
-        """Implemented a rate which gives the right answers, but it should give """        
-        return 6.69e-10
+        """De pH (Olsen) en Temperatuur (Arrhenius) formules uit het paper van Knops & Vink"""
+        # 1. pH afhankelijkheid (Olsen)
+        if self.ph < 6:
+            log_r = -0.48 * self.ph - 6.9
+        else:
+            log_r = -0.18 * self.ph - 8.8
+            
+        r_ph_factor = 10 ** log_r
+        
+        # 2. Temperatuur afhankelijkheid (Arrhenius functie uit paper)
+        R = 8.314          # Universele gasconstante (J / (K * mol))
+        T = self.environment.average_temperature + 273.15  # Absolute temperatuur in Kelvin
+        T_r = 283.7        # Referentietemperatuur uit het paper (K)
+        k_tr = 7.43e-11    # Referentie snelheidskonstante (mol * m^-2 * s^-1)
+        E_a = 79000        # Activatie-energie voor forsteriet (J/mol)
+        
+        # Arrhenius temperatuurfactor
+        arrhenius_factor = math.exp(-(E_a / R) * ((1 / T) - (1 / T_r)))
+        
+        # Gecombineerde dissolutiesnelheid
+        return k_tr * arrhenius_factor * r_ph_factor
+
+    # @property
+    # def dissolution_rate(self) -> float:
+    #     """Gecorrigeerde pH (Olsen) en Temperatuur (Arrhenius) dissoluratiesnelheid"""
+    #     # 1. pH afhankelijkheid (Olsen formule geeft direct de basissnelheid)
+    #     if self.ph < 6:
+    #         log_r = -0.48 * self.ph - 6.9
+    #     else:
+    #         log_r = -0.18 * self.ph - 8.8
+            
+    #     r_base = 10 ** log_r  # Dit is de absolute snelheid op basis van pH
+        
+    #     # 2. Temperatuur afhankelijkheid (Arrhenius correctie)
+    #     R = 8.314          # Universele gasconstante (J / (K * mol))
+    #     T = self.environment.average_temperature + 273.15  # Kelvin
+    #     T_r = 283.7        # Referentietemperatuur uit het paper (K)
+    #     E_a = 79000        # Activatie-energie (J/mol)
+        
+    #     arrhenius_factor = math.exp(-(E_a / R) * ((1 / T) - (1 / T_r)))
+        
+    #     # 3. Kalibratiefactor zodat het bij de standaard pH=6.0 en T=10.7°C 
+    #     # exact uitkomt op jouw werkende waarde (6.69e-10)
+    #     # Bij pH=6.0 is r_base ongeveer 1.32e-10. Om naar 6.69e-10 te gaan is de factor ~5.06
+    #     calibration_factor = 6.69e-10 / 1.32e-10 
+        
+    #     return r_base * arrhenius_factor * calibration_factor
 
 
     @staticmethod
     def calculate_shrunk_diameter(current_diam: float, dissolution_rate: float) -> float:
         """Calculates the new diameter of an olivine particle after one year."""
-        # TODO: find prove of these formule and refrence
-        # This might be the original paper: https://pdf.sciencedirectassets.com/276245/1-s2.0-S0082078455X80026/1-s2.0-S0082078455800331/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEF0aCXVzLWVhc3QtMSJHMEUCIDQ%2FEe5zFet2HU9X6Mc8n5bavpiGGvMN1LLQGZFLsEgcAiEA9VNIqaWRKT1tsesRfVbL8F2tsC8qqmgejnatrEKIZ%2BIqswUIJhAFGgwwNTkwMDM1NDY4NjUiDPDSE6S5P7Xk80Yp4iqQBU164g0seJM7YC4iMQSCPhpbffzg9bDpV6l2nT4fVrCtms6cPv1K%2ByYNG5LA0gTLLXPKEKglOxAw%2F53U5%2FAGTfXoj8ioDHuIrk%2Bbi26pq3gN5p7nMejjQR7MjzUOMFQSDN9T3B4%2BhuAHRrBdQuQBzW97myt%2FGP%2Bp1Auyp8HBPk%2Ff%2FWOIHgpa4tBRYC3g9mkAoHm%2BlU%2B3cyTKLcUqVwyvwEyov0lxieYEbxPc2ZZYrbZcCpfEESG9yquYlf8iLJWvVBNXv6L8TDAbpLGM2zho6fzTw2pqGrlx6sMwrJSJ9HABta0aIuPQUu7vEodGtMxIVKOR9vpjwmnWBsc3O2mSRSLdJSAJuejaqXdul5piQHSZLjuFK3wJq%2BGoWv70c0Z0vRHybWiyOOvogIjnODxSJIkizUAI722nk3TCJneTF5%2BAnKlZbfx9g5KXnJeak25eu83GEIaE5ma1CXvOUJRr2Y58Fw6EV%2ByInhxO5ApjJmb6FHobvO5F88jT5lLQ1sLRzuYUbXxUjVBuiJ7t6O16%2F7W84SeqCE7%2BX7QLDGyBEcFRneo%2FWbfkw5gtwlwPmt%2FTD%2BkuXC0o3oJl3PACO7u2ukVTSznePt42qLV5PDwQfv%2FIwtHRpc550DkkNrUwghn9FoDlvNW8Vq1wme5LU3p4GGtiwws4X%2BoJbsuWqGcMvg6wvKAzUhq5NFzdFKsuDNP3vfQ2yshDK%2BLumh53kFGwhyWwghFt3WrPX7x2GcaY7%2FV%2F2hTbPM%2FoQHIrHkuL7Vk%2FLL50q4IwklRQwfwb1fkEhe9yfRWVH7LRj1gos8W7CRfNbm22j%2FdMmW67jY6Dena9iofD%2F8X%2FtOCaobkFTPu9lzt8P%2BLkvMVLMD2NaRQyWPi5MKyontYGOrEBhOf22GLUtkWnC84t%2FzoEubBwOPBFV6vOuOtSKnJO%2F9VUqNPrRPeN5ozrvTdvNeAJs1ODL2xi3BdXdTKxJfVEj0zKfl5vQBZMmnipEB2te37nc8w0K2fX3D7u43ojmAn0V%2F%2Fx%2Byinmq7ojpGWUTsVONkeRIDiQCwuy6M0IZaX6FN68ZvizzVLcTGA2xHwM6CvL3TMV4bwXwG2fA3p81HXo9d8m6qj4AEoTsugzHeQ9iJF&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20261008T134749Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTYQT5652W7%2F20261008%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=e7db6805785ce81fdaa4d95d17f91ac6e6b5b1ed4d9674630be2f61f7125e449&hash=987e68738c1fdf73fe4c418497838a2f9acfb1abecdae9ebe8a107de8ed5b116&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S0082078455800331&tid=spdf-866f3cbe-3ce0-45ed-84d6-4b67e29bcebd&sid=7d9e34c218e98849f12841918dc7ab7a8e58gxrqb&type=client&tsoh=d3d3LnNjaWVuY2VkaXJlY3QuY29t&rh=d3d3LnNjaWVuY2VkaXJlY3QuY29t&ua=0b0a025053545d565706&rr=a475997d7e689f6c&cc=nl
         if current_diam <= 0:
              return 0.0
 
@@ -104,47 +151,46 @@ class Model:
         ...
 
     def plot_model(self):
-        """Plots the model simulation results against true observational data."""
-        plt.figure(figsize=(10, 6))
+        """Plott de modelresultaten op basis van de theoretische formules tegen de ware observaties."""
+        plt.figure(figsize=(12, 8))
+        colors = ['b', 'g', 'r']
         
-        for model_obs in self.model_observations:
-            init_d = model_obs.initial_diam
-            years = list(range(len(model_obs.diam_per_step)))
+        for idx, obs in enumerate(self.model_observations):
+            init_d = obs.initial_diam
+            years = list(range(len(obs.diam_per_step)))
+            c = colors[idx % len(colors)]
             
-            plt.plot(years, model_obs.diam_per_step, label=f"Model {init_d} µm", linestyle="-", linewidth=2)
+            # Plot de model simulatie met theoretische formules
+            plt.plot(years, obs.diam_per_step, label=f"Model (Theo pH/T) ({init_d} µm)", linestyle="-", color=c)
             
+            # Plot de werkelijke waarden ter vergelijking
             matching_true = next((t for t in self.true_values if t.initial_diam == init_d), None)
             if matching_true:
                 true_years = sorted(matching_true.diam_over_years.keys())
                 true_diams = [matching_true.diam_over_years[y] for y in true_years]
-                plt.plot(true_years, true_diams, label=f"True {init_d} µm", linestyle="--", marker="o", alpha=0.7)
+                plt.plot(true_years, true_diams, label=f"True ({init_d} µm)", linestyle="--", marker="o", alpha=0.7, color=c)
 
-        plt.title("Model vs. True Values: Olivine Weathering & Particle Shrinkage")
+        plt.title("Model vs True Values: pH & Temp Dependent Olivine Weathering")
         plt.xlabel("Years of Weathering")
-        plt.ylabel("Particle Diameter ($\mu$m)")
+        plt.ylabel(r"Particle Diameter ($\mu$m)")
         plt.grid(True, linestyle="--", alpha=0.5)
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small')
         plt.tight_layout()
 
-        output_filename = "olivine_model_comparison2.png"
-        plt.savefig(output_filename, dpi=300)
-        logging.info(f"Model comparison plot successfully saved as '{output_filename}'")
+        plt.savefig("olivine_model_comparison_theoretical.png", dpi=300)
         plt.close()
+        logging.info("Model vergelijkingsplot succesvol opgeslagen.")
         
 
     def spaghetti_plot(self):
         ...
 
     def step(self):
-        """
-        Update the state parameters
-        """
-        for model_obeservation in model_observations:
-            model_obeservation.diam_per_step.append(
-                self.calculate_shrunk_diameter(
-                    current_diam=model_obeservation.diam_per_step[-1], 
-                    dissolution_rate=self.dissolution_rate    
-            ))
+        """Update de deeltjesdiameter voor elke observatie op basis van de theoretische dissolution rate"""
+        for obs in self.model_observations:
+            current_diam = obs.diam_per_step[-1]
+            new_diam = self.calculate_shrunk_diameter(current_diam, self.dissolution_rate)
+            obs.diam_per_step.append(new_diam)
 
     def run_model(self):
         for current_year in range(1, self.time + 1):
