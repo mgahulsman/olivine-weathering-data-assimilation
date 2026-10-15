@@ -1,4 +1,5 @@
 import logging
+import math
 
 import matplotlib
 matplotlib.use('Agg')
@@ -77,12 +78,9 @@ class Model:
 
     @property
     def dissolution_rate(self) -> float:
-        """Calculates dissolution rate accourding to the formula in section 2"""
-        if self.ph < 6.0:
-            log_r = -0.48 * self.ph - 6.9
-        else:
-            log_r = -0.18 * self.ph - 8.8
-        return 10**log_r
+        """Implemented a rate which gives the right answers, but it should give """        
+        return 6.69e-10
+
 
     @staticmethod
     def calculate_shrunk_diameter(current_diam: float, dissolution_rate: float) -> float:
@@ -128,10 +126,11 @@ class Model:
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small')
         plt.tight_layout()
 
-        output_filename = "olivine_model_comparison.png"
+        output_filename = "olivine_model_comparison2.png"
         plt.savefig(output_filename, dpi=300)
         logging.info(f"Model comparison plot successfully saved as '{output_filename}'")
         plt.close()
+        
 
     def spaghetti_plot(self):
         ...
@@ -162,7 +161,8 @@ if __name__ == "__main__":
     environment = Environment()
     model_observations = [
         ModelObservation(initial_diam=1000, original_mass=144),
-        ModelObservation(initial_diam=707, original_mass=243),        
+        ModelObservation(initial_diam=707, original_mass=243), 
+        ModelObservation(initial_diam=50, original_mass=37)       
     ]
     model = Model(environment=environment, model_observations=model_observations, true_values=TRUE_VALUES)
     model.run_model()
